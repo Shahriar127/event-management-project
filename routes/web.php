@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\OrganiserController;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Laravel\Fortify\Features;
@@ -14,6 +15,15 @@ Route::get('/', function () {
         ],
     ]);
 })->name('home');
+
+// Custom login route to allow authenticated users to access it
+Route::get('/login', function (Request $request) {
+    return Inertia::render('auth/login', [
+        'canResetPassword' => Features::enabled(Features::resetPasswords()),
+        'canRegister' => Features::enabled(Features::registration()),
+        'status' => $request->session()->get('status'),
+    ]);
+})->middleware(['web'])->name('login');
 
 Route::middleware(['auth', 'verified'])->group(function () {
 

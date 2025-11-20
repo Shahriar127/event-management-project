@@ -35,9 +35,30 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Show organiser details (includes logo URL)
     Route::get('/organiser/{organiser}', [OrganiserController::class, 'show'])->name('organiser.show');
 
-    Route::get('dashboard', function () {
+    Route::get('/dashboard', function () {
         return Inertia::render('dashboard');
     })->name('dashboard');
+
+    // Events listing for the authenticated organiser
+    Route::get('/events', function () {
+        $organiser = auth()->user()->organiser;
+
+        return Inertia::render('events', [
+            'organiser' => $organiser,
+        ]);
+    })->name('events');
+
+    // Show create event form
+    Route::get('/events/create', function () {
+        $organiser = auth()->user()->organiser;
+
+        return Inertia::render('events/create', [
+            'organiser' => $organiser,
+        ]);
+    })->name('events.create');
+
+    // Handle create event POST
+    Route::post('/events', [\App\Http\Controllers\EventController::class, 'store'])->name('events.store');
 });
 
 // Simple test page to verify frontend <-> backend communication.

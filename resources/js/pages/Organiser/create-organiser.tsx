@@ -12,10 +12,11 @@ export default function CreateOrganiser() {
     const [email, setEmail] = useState('');
     const [description, setDescription] = useState('');
     const [facebookLink, setFacebookLink] = useState('');
-
     // Logo upload state
     const [logoFile, setLogoFile] = useState<File | null>(null);
     const [logoPreview, setLogoPreview] = useState<string | null>(null);
+    const [fileName, setFileName] = useState<string | null>(null);
+    const [isDragging, setIsDragging] = useState<boolean>(false);
     const fileInputRef = useRef<HTMLInputElement | null>(null);
 
     useEffect(() => {
@@ -26,7 +27,7 @@ export default function CreateOrganiser() {
     }, [logoPreview]);
 
     return (
-        // <AppLayout>
+
         <>
             <Head title="Create Organiser" />
 
@@ -116,65 +117,95 @@ export default function CreateOrganiser() {
 
                             <div>
                                 <Label htmlFor="logo">Organiser logo</Label>
-                                <div className="mt-2 flex items-center gap-4">
-                                    <input
-                                        ref={fileInputRef}
-                                        type="file"
-                                        id="logo"
-                                        name="logo"
-                                        accept="image/*"
-                                        className="sr-only"
-                                        onChange={(e) => {
-                                            const f = e.target.files?.[0] ?? null;
-                                            setLogoFile(f);
+                                <div className="mt-2">
+                                    <div
+                                        className={`relative flex items-center justify-center w-full rounded-md border-2 border-dashed border-gray-200 bg-gray-50 px-4 py-6 hover:border-gray-300 transition-colors ${isDragging ? 'border-blue-300 bg-blue-50' : ''}`}
+                                        onClick={() => fileInputRef.current?.click()}
+                                        onDragOver={(e) => {
+                                            e.preventDefault();
+                                        }}
+                                        onDragEnter={(e) => {
+                                            e.preventDefault();
+                                            setIsDragging(true);
+                                        }}
+                                        onDragLeave={(e) => {
+                                            e.preventDefault();
+                                            setIsDragging(false);
+                                        }}
+                                        onDrop={(e) => {
+                                            e.preventDefault();
+                                            setIsDragging(false);
+                                            const f = e.dataTransfer?.files?.[0] ?? null;
                                             if (f) {
-                                                const url = URL.createObjectURL(f);
-                                                setLogoPreview(url);
-                                            } else {
-                                                setLogoPreview(null);
+                                                setFileName(f.name);
+                                                setLogoPreview(URL.createObjectURL(f));
+                                                // Populate the hidden file input so the native form submits the file
+                                                try {
+                                                    const dt = new DataTransfer();
+                                                    dt.items.add(f);
+                                                    if (fileInputRef.current) fileInputRef.current.files = dt.files;
+                                                } catch (err) {
+                                                    // DataTransfer may not be available in some browsers/environments
+                                                }
                                             }
                                         }}
-                                    />
+                                    >
+                                        <input
+                                            ref={fileInputRef}
+                                            type="file"
+                                            id="logo"
+                                            name="logo"
+                                            accept="image/*"
+                                            className="sr-only"
+                                            onChange={(e) => {
+                                                const f = e.target.files?.[0] ?? null;
+                                                setLogoFile(f);
+                                                if (f) {
+                                                    setFileName(f.name);
+                                                    setLogoPreview(URL.createObjectURL(f));
+                                                } else {
+                                                    setFileName(null);
+                                                    setLogoPreview(null);
+                                                }
+                                            }}
+                                        />
 
-                                    <div className="flex items-center gap-4">
-                                        <div className="h-20 w-20 flex-shrink-0 overflow-hidden rounded-md border border-dashed border-muted-foreground/30 bg-muted p-1">
-                                            {logoPreview ? (
-                                                <img src={logoPreview} alt="Logo preview" className="h-full w-full object-cover" />
-                                            ) : (
-                                                <div className="flex h-full w-full items-center justify-center text-sm text-muted-foreground">
-                                                    No logo
+                                        {!logoPreview ? (
+                                            <div className="flex flex-col items-center text-sm text-gray-600">
+                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V7M16 3v4M8 3v4m8 4l-4 4-4-4" />
+                                                </svg>
+                                                <div className="mt-2">Click to upload or drag and drop</div>
+                                                <div className="mt-1 text-xs text-gray-500">SVG, PNG or JPG — max 5MB</div>
+                                            </div>
+                                        ) : (
+                                            <div className="flex w-full items-center justify-between gap-4">
+                                                <div className="flex items-center gap-4">
+                                                    <img src={logoPreview} alt="logo preview" className="h-20 w-20 rounded-md object-cover border" />
+                                                    <div className="flex flex-col text-sm">
+                                                        <span className="font-medium">{fileName}</span>
+                                                        <span className="text-xs text-gray-500">Selected logo</span>
+                                                    </div>
                                                 </div>
-                                            )}
-                                        </div>
-                                        <div className="flex flex-col justify-center">
-                                            <div className="flex items-center gap-3">
-                                                <Button
-                                                    type="button"
-                                                    className="bg-neutral-700 text-white px-4 py-2 rounded-md shadow-sm"
-                                                    onClick={() => fileInputRef.current?.click()}
-                                                >
-                                                    Browse…
-                                                </Button>
-
-                                                {logoFile && (
-                                                    <Button
+                                                <div className="flex gap-2">
+                                                    <button
                                                         type="button"
-                                                        className="bg-transparent text-sm text-muted-foreground"
-                                                        onClick={() => {
-                                                            setLogoFile(null);
+                                                        className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700 hover:bg-red-100"
+                                                        onClick={(ev) => {
+                                                            ev.stopPropagation();
+                                                            setFileName(null);
                                                             setLogoPreview(null);
+                                                            setLogoFile(null);
                                                             if (fileInputRef.current) fileInputRef.current.value = '';
                                                         }}
                                                     >
                                                         Remove
-                                                    </Button>
-                                                )}
+                                                    </button>
+                                                </div>
                                             </div>
-                                            {/* <div className="mt-2 text-xs text-muted-foreground">
-                                                    {logoFile ? logoFile.name : 'SVG, PNG or JPG — max 2MB'}
-                                                </div> */}
-                                        </div>
+                                        )}
                                     </div>
+                                    <p className="mt-2 text-xs text-gray-500">Optional — add a logo to represent your organiser.</p>
                                 </div>
                             </div>
 

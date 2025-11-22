@@ -43,8 +43,11 @@ class HandleInertiaRequests extends Middleware
             'name' => config('app.name'),
             'quote' => ['message' => trim($message), 'author' => trim($author)],
             'auth' => [
-                'user' => $request->user(),
+                // Load the organiser relationship so the frontend receives user.organiser if it exists
+                'user' => $request->user() ? $request->user()->load('organiser') : null,
             ],
+            // Share the authenticated user's organiser (if any) as a top level prop for convenience
+            'organiser' => $request->user() ? $request->user()->organiser : null,
             // Share session flash messages with Inertia so frontend can display them
             'flash' => [
                 'success' => $request->session()->get('success'),

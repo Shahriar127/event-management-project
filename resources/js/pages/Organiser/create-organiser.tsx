@@ -35,10 +35,23 @@ export default function CreateOrganiser() {
                 <div className="w-full max-w-xl">
                     <div className="rounded-lg bg-white p-8 shadow-md dark:bg-neutral-900">
                         {flash?.success && (
-                            <div className="mb-4 rounded-md border border-green-200 bg-green-50 p-3 text-sm text-green-800">
-                                {flash.success}
+                            <div className="mb-4 flex items-center gap-2 rounded-md border border-green-300 bg-green-50 p-3 text-sm text-green-800 shadow-sm animate-fade-in">
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    viewBox="0 0 20 20"
+                                    fill="currentColor"
+                                    className="size-5 text-green-600"
+                                >
+                                    <path
+                                        fillRule="evenodd"
+                                        d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-10.707a1 1 0 00-1.414-1.414L9 9.586 7.707 8.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                                        clipRule="evenodd"
+                                    />
+                                </svg>
+                                <span className="font-medium">{flash.success}</span>
                             </div>
                         )}
+
                         <h1 className="mb-2 text-center text-2xl font-semibold">Create Organiser</h1>
                         <p className="mb-6 text-center text-sm text-muted-foreground">
                             Before you create events you'll need to create an organiser. An

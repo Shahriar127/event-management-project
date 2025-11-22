@@ -42,10 +42,12 @@ class EventController extends Controller
 
         $event = Event::create($data);
 
-        // If Inertia request, redirect to events listing with flash
+        // If Inertia request, redirect to the event tickets first-run page with flash
         if ($request->header('X-Inertia')) {
             $request->session()->flash('success', 'Event created successfully.');
-            return \Inertia\Inertia::location(route('events'));
+            // Redirect to the event tickets page (first-run flow) so the organiser can create tickets
+            $ticketsUrl = url("/event/{$event->id}/tickets?first_run=yup");
+            return \Inertia\Inertia::location($ticketsUrl);
         }
 
         return new EventResource($event);

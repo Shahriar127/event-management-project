@@ -41,6 +41,11 @@ export default function CreateEvent({ organiser }: { organiser: any }) {
                             <input type="hidden" name="EndDate" value={endDate ? endDate.toISOString() : ''} />
 
                             <div>
+                                <Label htmlFor="Title">Event Name</Label>
+                                <Input id="Title" name="Title" required />
+                            </div>
+
+                            <div>
                                 <Label htmlFor="Description">Description</Label>
                                 <Textarea id="Description" name="Description" required />
                             </div>
